@@ -1,0 +1,111 @@
+#!/bin/bash
+
+set -e
+
+MAP=""
+FORMAT="webp"
+API_KEY=""
+TARGET_DIR=""
+TARGET_NAME=""
+SKIP_IF_EXISTS=""
+SKIP_IF_DEBUG=""
+
+while [[ "$#" -gt 0 ]]; do
+	case $1 in
+		
+		# The ID of the map
+		-m|--map)         MAP="$2"; shift ;;
+		
+		# The format code of the map bundle (defaults to webp)
+		-f|--format)      FORMAT="$2"; shift ;;
+		
+		# The API key (attempts to detect it from the app's Info.plist if not specified)
+		-k|--api-key)     API_KEY="$2"; shift ;;
+		
+		# The directory to place the map bundle in
+		-d|--dir)         TARGET_DIR="${2%/}"; shift ;;
+		
+		# The name of the map bundle (defaults to the map ID)
+		-n|--name)        TARGET_NAME="$2"; shift ;;
+		
+		# Skips downloading the map bundle if there is already a map downloaded
+		--skip-if-exists) SKIP_IF_EXISTS=1 ;;
+		
+		# Skips downloading the map bundle if a debug build is detected and there is already a map downloaded
+		--skip-if-debug)  SKIP_IF_DEBUG=1 ;;
+
+		*) break ;;
+	esac
+	shift
+done
+
+if [[ -z "$MAP" ]]; then
+	echo "error: No map ID specified"
+	exit 1
+fi
+
+if [[ -z "$API_KEY" ]] && [[ ! -z "$INFOPLIST_FILE" ]]; then
+	API_KEY=$(plutil -extract "AppLayr.APIKey" raw "$INFOPLIST_FILE" || true)
+	
+	if [[ $? -ne 0 ]]; then
+		API_KEY=""
+	fi
+fi
+
+if [[ -z "$API_KEY" ]]; then
+	echo "error: No API key specified"
+	exit 1
+fi
+
+if [[ -z "$TARGET_DIR" ]]; then
+	echo "error: No target directory specified"
+	exit 1
+fi
+
+if [[ -z "$TARGET_NAME" ]]; then
+	TARGET_NAME="$MAP"
+fi
+
+if [[ ! -d "$TARGET_DIR" ]]; then
+	echo "error: Target map directory doesn't exist: $TARGET_DIR"
+	exit 2
+fi
+
+if [[ $SKIP_IF_DEBUG == 1 ]] && [[ $CONFIGURATION == "Debug" ]]; then
+	SKIP_IF_EXISTS=1
+fi
+
+if [[ $SKIP_IF_EXISTS == 1 ]] && [[ -f "$TARGET_DIR/$TARGET_NAME/manifest.json" ]]; then
+	echo "Skipping map download as previous map detected"
+	exit 0
+fi
+
+TEMP_DIRECTORY=`mktemp -d`
+
+curl -Lfs --header "X-API-Key: $API_KEY" "https://api.attractions.io/v2/map-bundle/$MAP/version/latest/format/$FORMAT" > "$TEMP_DIRECTORY/bundle.zip" || {
+	echo "error: Could not download map $MAP"
+	rm -r "$TEMP_DIRECTORY"
+	exit 3
+}
+
+mkdir "$TEMP_DIRECTORY/bundle"
+cd "$TEMP_DIRECTORY/bundle"
+
+unzip ../bundle.zip >/dev/null
+
+cd - >/dev/null
+
+if [[ -d "$TARGET_DIR/$TARGET_NAME" ]]; then
+	if [[ -d ~/.Trash ]]; then
+		DATE_SUFFIX=`date "+%H.%M.%S"`
+		TRASH_NAME=~/.Trash/"$TARGET_NAME $DATE_SUFFIX"
+		
+		mv "$TARGET_DIR/$TARGET_NAME" "$TRASH_NAME"
+	else
+		rm -r "$TARGET_DIR/$TARGET_NAME"
+	fi
+fi
+
+mv "$TEMP_DIRECTORY/bundle" "$TARGET_DIR/$TARGET_NAME"
+
+rm -r "$TEMP_DIRECTORY"

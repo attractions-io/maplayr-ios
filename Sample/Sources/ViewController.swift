@@ -1,0 +1,285 @@
+//
+//  ViewController.swift
+//  MapLayr Sample
+//
+//  Created by Robert Pugh on 2023-09-28.
+//
+
+import UIKit
+import MapLayr
+import CoreLocation
+
+class ViewController: UIViewController {
+	/// The ID of the demo map.
+	let mapID = "5a1400cf-db2b-4dec-90f2-8f603cab4e72"
+	
+	var map: Map!
+	@IBOutlet var mapView: MapView!
+	
+	let locationManager = CLLocationManager()
+	
+	@IBOutlet var mapDownloadIndicator: UIActivityIndicatorView!
+	@IBOutlet var mapDownloadButton: UIButton!
+	@IBOutlet var statusBarProtection: UIView!
+	@IBOutlet var mapControls: UIView!
+	@IBOutlet var routeFocusedButton: UIButton!
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		// Request permission to use location services.
+		locationManager.requestWhenInUseAuthorization()
+		
+		// Get location updates to update the route.
+		locationManager.delegate = self
+		locationManager.startUpdatingLocation()
+		
+		routeFocusedButton.alpha = 0
+		routeFocusedButton.isHidden = true
+		
+		// Loads the map into the map view.
+		loadMap()
+	}
+	
+	/// Loads the map object and assigns it to the map view.
+	@IBAction private func loadMap() {
+		mapDownloadButton.isHidden = true
+		
+		Task {
+			do {
+				// Fetches the map object. There is a synchronous version available, but this will only succeed if the map is bundled with the application, or the map has already been downloaded.
+				// Even with the asynchronous version, this function will return immediately if the map doesn't need to be downloaded.
+				map = try await Map.managed(id: mapID)
+				
+				// Assign the map to the map view.
+				mapView.map = map
+				
+				// Add the user location marker.
+				addUserLocationMarker()
+				
+				// Add the annotations.
+				addAnnotations()
+				
+				// Reveal the map view.
+				mapView.isHidden = false
+				statusBarProtection.isHidden = false
+				mapControls.isHidden = false
+				
+				mapDownloadIndicator.stopAnimating()
+			} catch {
+				showMapDownloadError()
+			}
+		}
+		
+		if map == nil {
+			mapDownloadIndicator.startAnimating()
+		}
+	}
+	
+	/// Displays an error message to the user informing them that the map cannot be downloaded, and prepares the UI for retrying the map download in the future.
+	private func showMapDownloadError() {
+		let alert = UIAlertController(
+			title: "Cannot Show Map",
+			message: "The map cannot be displayed at this time, please check your internet connection and try again.",
+			preferredStyle: .alert
+		)
+		
+		alert.addAction(UIAlertAction(title: "OK", style: .default))
+		
+		present(alert, animated: true)
+		
+		mapDownloadIndicator.stopAnimating()
+		mapDownloadButton.isHidden = false
+	}
+	
+	/// Adds a user location marker to the map view.
+	private func addUserLocationMarker() {
+		// Create user location marker configured to automatically determine location and heading.
+		let marker = UserLocationMarker()
+		
+		// Add the user location marker to the map.
+		mapView.addUserLocationMarker(marker)
+	}
+	
+	/// Adds the ride annotations to the map view.
+	private func addAnnotations() {
+		// Create the annotation layer.
+		let layer = CoordinateAnnotationLayer<Ride>(
+			coordinate: \.coordinates,
+			view: {
+				let view = LabeledAnnotationIcon(icon: #imageLiteral(resourceName: "Annotation"), text: $0.name)
+				
+				view.imageView.layer.anchorPoint = CGPoint(x: 0.5, y: 30 / 34)
+				view.spacing = -14
+				
+				view.label.highlightedTextColor = .red
+				
+				view.label.textStrokeWidth = 3
+				
+				view.label.layer.shadowOpacity = 0.5
+				view.label.layer.shadowOffset = .zero
+				view.label.layer.shadowRadius = 1.5
+				view.label.layer.shouldRasterize = true
+				
+				return view
+			}
+		)
+		
+		// Set the view controller as the map layer's delegate.
+		layer.delegate = self
+		
+		// Add the annotations to the annotation layer.
+		layer.insert(rides)
+		
+		// Add the annotation layer to the map view.
+		mapView.addMapLayer(layer)
+	}
+	
+	/// The current route's destination, if a route is currently active.
+	private var routeDestination: Coordinates? = nil {
+		didSet {
+			updateRoute()
+		}
+	}
+	
+	/// Updates the route.
+	///
+	/// This method should be called whenever the origin or destination of the route changes.
+	private func updateRoute() {
+		guard let mapView else {
+			return
+		}
+		
+		let path: Path?
+		
+		setPath: do {
+			guard let originLocation = locationManager.location?.coordinate else {
+				path = nil
+				break setPath
+			}
+			
+			guard let destinationLocation = routeDestination else {
+				path = nil
+				break setPath
+			}
+			
+			let route = map.pathNetwork!.calculateDirections(from: Coordinates(originLocation), to: [ destinationLocation ])
+			
+			guard let route else {
+				print("A route to the destination was not found.")
+				path = nil
+				break setPath
+			}
+			
+			path = route.path
+		}
+		
+		if let path {
+			let innerShape = Shape(path: path, strokeColor: #colorLiteral(red: 0.9096202274, green: 0.9848581969, blue: 1, alpha: 1).cgColor, strokeWidth: 10)
+			let outerShape = Shape(path: path, strokeColor: #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1).cgColor, strokeWidth: 5)
+			
+			mapView.shapes = [ innerShape, outerShape ]
+		} else {
+			mapView.shapes = []
+		}
+		
+		let hideRouteButton = path == nil
+		
+		if routeFocusedButton.isHidden != hideRouteButton {
+			UIView.animate(withDuration: 0.15) {
+				self.routeFocusedButton.alpha = hideRouteButton ? 0 : 1
+				self.routeFocusedButton.isHidden = hideRouteButton
+			}
+		}
+	}
+	
+	/// Zooms the camera to the user's location, if available.
+	///
+	/// The camera is positioned so that at least 100 metres is visible around the user in all directions. The camera's heading and tilt are left at their previous values.
+	@IBAction func zoomToUserLocation() {
+		guard let location = locationManager.location?.coordinate else {
+			return
+		}
+		
+		mapView.moveCamera(
+			coordinates: location,
+			span: 100,
+			animated: true
+		)
+	}
+	
+	/// Zooms the camera to the user's location, pointing towards the route destination, if both locations are available.
+	///
+	/// The camera is positioned so that at least 50 metres is visible around the user in all directions. The heading of the camera is adjusted to point at the route's destination, and the camera is tilted 45°.
+	@IBAction func zoomToRouteFocusedLocation() {
+		guard let location = locationManager.location?.coordinate else {
+			return
+		}
+		
+		guard let destination = routeDestination else {
+			return
+		}
+		
+		mapView.moveCamera(
+			coordinates: location,
+			heading: Coordinates(location).bearing(to: destination),
+			span: 50,
+			tilt: .pi / 4,
+			animated: true
+		)
+	}
+	
+	/// Zooms the camera so that all the annotations are visible.
+	///
+	/// The camera is positioned so that all the annotations are just visible, with an extra 50 points of margin to account for the sizes of the annotations themselves. The camera's heading is left at its previous value.
+	@IBAction func zoomToAnnotations() {
+		let annotationCoordinates = rides.map(\.coordinates)
+		
+		guard let (center, span) = computeSmallestCircle(coordinates: annotationCoordinates) else {
+			return
+		}
+		
+		mapView.moveCamera(
+			coordinates: center,
+			span: span,
+			insets: 50,
+			tilt: 0,
+			animated: true
+		)
+	}
+	
+	override var preferredStatusBarStyle: UIStatusBarStyle {
+		switch traitCollection.userInterfaceStyle {
+		case .dark:
+			return .lightContent
+		default:
+			return .darkContent
+		}
+	}
+	
+	override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+		.allButUpsideDown
+	}
+	
+	override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+		setNeedsStatusBarAppearanceUpdate()
+	}
+}
+
+extension ViewController: CoordinateAnnotationLayerDelegate {
+	typealias Element = Ride
+	
+	func didDeselectAnnotation(_ element: Ride, in annotationLayer: CoordinateAnnotationLayer<Ride>) {
+		routeDestination = nil
+	}
+	
+	func didSelectAnnotation(_ element: Ride, in annotationLayer: CoordinateAnnotationLayer<Ride>) {
+		routeDestination = element.coordinates
+	}
+}
+
+extension ViewController: CLLocationManagerDelegate {
+	func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+		updateRoute()
+	}
+}

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="MapLayr_Sample" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hL4-oi-PAQ" customClass="MapView" customModule="MapLayrInternal">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
+                            <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="6zn-yF-bxh">
+                                <rect key="frame" x="16" y="783.66666666666663" width="160" height="34.333333333333371"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sFO-gT-fjy" userLabel="Show Your Location">
+                                        <rect key="frame" x="0.0" y="0.0" width="49.333333333333336" height="34.333333333333336"/>
+                                        <accessibility key="accessibilityConfiguration" label="Show Your Location"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" image="location" catalog="system"/>
+                                        <connections>
+                                            <action selector="zoomToUserLocation" destination="BYZ-38-t0r" eventType="touchUpInside" id="KUs-KE-6Gh"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6Df-vw-Kle" userLabel="Show Route Focused Location">
+                                        <rect key="frame" x="55.333333333333329" y="0.0" width="49.333333333333329" height="34.333333333333336"/>
+                                        <accessibility key="accessibilityConfiguration" label="Show Route Focused Location"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" image="location.north.line" catalog="system"/>
+                                        <connections>
+                                            <action selector="zoomToRouteFocusedLocation" destination="BYZ-38-t0r" eventType="touchUpInside" id="hV4-Os-Gar"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rFC-4K-qsb" userLabel="Show All Annotations">
+                                        <rect key="frame" x="110.66666666666667" y="0.0" width="49.333333333333329" height="34.333333333333336"/>
+                                        <accessibility key="accessibilityConfiguration" label="Show All Annotations"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="filled" image="mappin.and.ellipse" catalog="system"/>
+                                        <connections>
+                                            <action selector="zoomToAnnotations" destination="BYZ-38-t0r" eventType="touchUpInside" id="75F-SW-GNi"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="2Pd-8a-q5V">
+                                <rect key="frame" x="178" y="420" width="37" height="37"/>
+                            </activityIndicatorView>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="M5f-ha-riy">
+                                <rect key="frame" x="105.33333333333333" y="421.33333333333331" width="182.33333333333337" height="34.333333333333314"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="Retry Map Download"/>
+                                <connections>
+                                    <action selector="loadMap" destination="BYZ-38-t0r" eventType="touchUpInside" id="Rdf-TL-Ag5"/>
+                                </connections>
+                            </button>
+                            <visualEffectView hidden="YES" opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8fi-C4-7gG">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="59"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="Njz-M3-3Hq">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="59"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                </view>
+                                <blurEffect style="regular"/>
+                            </visualEffectView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="8fi-C4-7gG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="IoB-fZ-g8X"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="6zn-yF-bxh" secondAttribute="bottom" id="L8f-Ia-JgO"/>
+                            <constraint firstItem="6zn-yF-bxh" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="REd-Wb-eIm"/>
+                            <constraint firstItem="hL4-oi-PAQ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="TOb-OB-oua"/>
+                            <constraint firstItem="8fi-C4-7gG" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="WNC-2T-5vj"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="6zn-yF-bxh" secondAttribute="trailing" constant="16" id="bui-62-0HM"/>
+                            <constraint firstItem="M5f-ha-riy" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="cHh-J8-3OQ"/>
+                            <constraint firstItem="M5f-ha-riy" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="cTT-lk-phg"/>
+                            <constraint firstAttribute="trailing" secondItem="8fi-C4-7gG" secondAttribute="trailing" id="dnZ-iX-jsy"/>
+                            <constraint firstItem="2Pd-8a-q5V" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="if1-qB-Jbk"/>
+                            <constraint firstAttribute="bottom" secondItem="hL4-oi-PAQ" secondAttribute="bottom" id="ocS-cw-9eu"/>
+                            <constraint firstItem="hL4-oi-PAQ" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="p0X-VR-2c8"/>
+                            <constraint firstItem="2Pd-8a-q5V" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="qKI-uK-5GT"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="top" secondItem="8fi-C4-7gG" secondAttribute="bottom" id="wMK-4J-Uw8"/>
+                            <constraint firstItem="hL4-oi-PAQ" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="zjf-wI-5ww"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="mapControls" destination="6zn-yF-bxh" id="9GP-sd-pKS"/>
+                        <outlet property="mapDownloadButton" destination="M5f-ha-riy" id="zSx-AI-gcD"/>
+                        <outlet property="mapDownloadIndicator" destination="2Pd-8a-q5V" id="ntu-Gs-dFs"/>
+                        <outlet property="mapView" destination="hL4-oi-PAQ" id="5je-Wv-ZjA"/>
+                        <outlet property="routeFocusedButton" destination="6Df-vw-Kle" id="wiY-6w-Sxq"/>
+                        <outlet property="statusBarProtection" destination="8fi-C4-7gG" id="Bbn-0S-n6o"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="139.69465648854961" y="24.647887323943664"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="location" catalog="system" width="128" height="119"/>
+        <image name="location.north.line" catalog="system" width="84" height="128"/>
+        <image name="mappin.and.ellipse" catalog="system" width="110" height="128"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
