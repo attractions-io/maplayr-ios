@@ -8,6 +8,7 @@
 import UIKit
 import MapLayr
 import CoreLocation
+import Combine
 
 class ViewController: UIViewController {
 	/// The ID of the demo map.
@@ -22,6 +23,7 @@ class ViewController: UIViewController {
 	@IBOutlet var mapDownloadButton: UIButton!
 	@IBOutlet var statusBarProtection: UIView!
 	@IBOutlet var mapControls: UIView!
+	@IBOutlet var zoomToUserLocationButton: UIButton!
 	@IBOutlet var routeFocusedButton: UIButton!
 	
 	override func viewDidLoad() {
@@ -41,6 +43,9 @@ class ViewController: UIViewController {
 		loadMap()
 	}
 	
+	/// Holds reference for receiving update to the map's bounds.
+	private var mapBoundsUpdater: AnyCancellable?
+	
 	/// Loads the map object and assigns it to the map view.
 	@IBAction private func loadMap() {
 		mapDownloadButton.isHidden = true
@@ -50,6 +55,9 @@ class ViewController: UIViewController {
 				// Fetches the map object. There is a synchronous version available, but this will only succeed if the map is bundled with the application, or the map has already been downloaded.
 				// Even with the asynchronous version, this function will return immediately if the map doesn't need to be downloaded.
 				map = try await Map.managed(id: mapID)
+				
+				/// Receives updates to the map's bounds, so that the zoom to user location button can be updated if the bounds changes.
+				mapBoundsUpdater = map.$bounds.receive(on: RunLoop.main).sink(receiveValue: { [weak self] _ in self?.updateLocationButtonAvailability() })
 				
 				// Assign the map to the map view.
 				mapView.map = map
@@ -193,6 +201,29 @@ class ViewController: UIViewController {
 		}
 	}
 	
+	/// Enables or disables the "zoom to user location" button depending on whether the user is within the map bounds.
+	///
+	/// This method should be called if either the user's location updates or the map bounds updates, as either event may cause the user location button's availability to change.
+	func updateLocationButtonAvailability() {
+		let shouldEnable: Bool
+		
+		checkAvailability: do {
+			guard let location = locationManager.location?.coordinate else {
+				shouldEnable = false
+				break checkAvailability
+			}
+			
+			guard let map, map.bounds.contains(Coordinates(location).mapPoint(using: .webMercator)) else {
+				shouldEnable = false
+				break checkAvailability
+			}
+			
+			shouldEnable = true
+		}
+		
+		zoomToUserLocationButton.isEnabled = shouldEnable
+	}
+	
 	/// Zooms the camera to the user's location, if available.
 	///
 	/// The camera is positioned so that at least 100 metres is visible around the user in all directions. The camera's heading and tilt are left at their previous values.
@@ -281,5 +312,6 @@ extension ViewController: CoordinateAnnotationLayerDelegate {
 extension ViewController: CLLocationManagerDelegate {
 	func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 		updateRoute()
+		updateLocationButtonAvailability()
 	}
 }

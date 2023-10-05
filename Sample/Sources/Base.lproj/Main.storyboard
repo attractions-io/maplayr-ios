@@ -23,7 +23,7 @@
                             <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="6zn-yF-bxh">
                                 <rect key="frame" x="16" y="783.66666666666663" width="160" height="34.333333333333371"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sFO-gT-fjy" userLabel="Show Your Location">
+                                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sFO-gT-fjy" userLabel="Show Your Location">
                                         <rect key="frame" x="0.0" y="0.0" width="49.333333333333336" height="34.333333333333336"/>
                                         <accessibility key="accessibilityConfiguration" label="Show Your Location"/>
                                         <state key="normal" title="Button"/>
@@ -99,6 +99,7 @@
                         <outlet property="mapView" destination="hL4-oi-PAQ" id="5je-Wv-ZjA"/>
                         <outlet property="routeFocusedButton" destination="6Df-vw-Kle" id="wiY-6w-Sxq"/>
                         <outlet property="statusBarProtection" destination="8fi-C4-7gG" id="Bbn-0S-n6o"/>
+                        <outlet property="zoomToUserLocationButton" destination="sFO-gT-fjy" id="AZR-9X-erm"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
