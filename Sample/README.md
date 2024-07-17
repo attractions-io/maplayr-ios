@@ -8,6 +8,6 @@ This sample demonstrates how to use MapLayr in an iOS app. It includes code to:
 - Calculate and display routes from the user's location to a destination
 - Move the camera
 
-Set your location to or near **52.897, -1.8478** to see the user's location on the map. Tap on an annotation to get directions from the user's location to the selected annotation.
+Set your location to or near **52.897, -1.8478** to see the user's location on the map, or use the included GPX file. Tap on an annotation to get directions from the user's location to the selected annotation.
 
 All of the interaction with the Maps SDK takes place in [`ViewController.swift`](Sources/ViewController.swift).

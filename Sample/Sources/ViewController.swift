@@ -17,6 +17,9 @@ class ViewController: UIViewController {
 	var map: Map!
 	@IBOutlet var mapView: MapView!
 	
+	// A user location marker without any parameters automatically tracks the device location and heading.
+	let userLocationMarker = UserLocationMarker()
+	
 	let locationManager = CLLocationManager()
 	
 	@IBOutlet var mapDownloadIndicator: UIActivityIndicatorView!
@@ -24,7 +27,6 @@ class ViewController: UIViewController {
 	@IBOutlet var statusBarProtection: UIView!
 	@IBOutlet var mapControls: UIView!
 	@IBOutlet var zoomToUserLocationButton: UIButton!
-	@IBOutlet var routeFocusedButton: UIButton!
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -35,9 +37,6 @@ class ViewController: UIViewController {
 		// Get location updates to update the route.
 		locationManager.delegate = self
 		locationManager.startUpdatingLocation()
-		
-		routeFocusedButton.alpha = 0
-		routeFocusedButton.isHidden = true
 		
 		// Loads the map into the map view.
 		loadMap()
@@ -62,8 +61,12 @@ class ViewController: UIViewController {
 				// Assign the map to the map view.
 				mapView.map = map
 				
+				// Assign this view controller to be a delegate of the map view.
+				// This is used to be notified if the user unlocks the camera by dragging away.
+				mapView.delegate = self
+				
 				// Add the user location marker.
-				addUserLocationMarker()
+				mapView.addUserLocationMarker(userLocationMarker)
 				
 				// Add the annotations.
 				addAnnotations()
@@ -98,15 +101,6 @@ class ViewController: UIViewController {
 		
 		mapDownloadIndicator.stopAnimating()
 		mapDownloadButton.isHidden = false
-	}
-	
-	/// Adds a user location marker to the map view.
-	private func addUserLocationMarker() {
-		// Create user location marker configured to automatically determine location and heading.
-		let marker = UserLocationMarker()
-		
-		// Add the user location marker to the map.
-		mapView.addUserLocationMarker(marker)
 	}
 	
 	/// Adds the ride annotations to the map view.
@@ -190,15 +184,6 @@ class ViewController: UIViewController {
 		} else {
 			mapView.shapes = []
 		}
-		
-		let hideRouteButton = path == nil
-		
-		if routeFocusedButton.isHidden != hideRouteButton {
-			UIView.animate(withDuration: 0.15) {
-				self.routeFocusedButton.alpha = hideRouteButton ? 0 : 1
-				self.routeFocusedButton.isHidden = hideRouteButton
-			}
-		}
 	}
 	
 	/// Enables or disables the "zoom to user location" button depending on whether the user is within the map bounds.
@@ -224,19 +209,15 @@ class ViewController: UIViewController {
 		zoomToUserLocationButton.isEnabled = shouldEnable
 	}
 	
-	/// Zooms the camera to the user's location, if available.
-	///
-	/// The camera is positioned so that at least 100 metres is visible around the user in all directions. The camera's heading and tilt are left at their previous values.
+	/// Toggle between locking the user location marker to the position, the position and orientation, or unlock the camera, depending on the current state.
 	@IBAction func zoomToUserLocation() {
-		guard let location = locationManager.location?.coordinate else {
-			return
+		if mapView.positionProvider == nil {
+			lockCameraPosition()
+		} else if mapView.orientationProvider == nil {
+			lockCameraOrientation()
+		} else {
+			unlockCamera()
 		}
-		
-		mapView.moveCamera(
-			coordinates: location,
-			span: 100,
-			animated: true
-		)
 	}
 	
 	/// Zooms the camera to the user's location, pointing towards the route destination, if both locations are available.
@@ -279,6 +260,37 @@ class ViewController: UIViewController {
 		)
 	}
 	
+	/// Locks the camera (and zooms in) so that its position tracks the user location marker.
+	private func lockCameraPosition() {
+		mapView.setProvider(position: userLocationMarker, animated: true)
+		mapView.moveCamera(span: 50, animated: true)
+		
+		zoomToUserLocationButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
+	}
+	
+	/// Locks the camera so that its orientation tracks the user location marker.
+	///
+	/// Additionally tilt the camera to 45°.
+	private func lockCameraOrientation() {
+		mapView.setProvider(orientation: userLocationMarker, animated: true)
+		mapView.moveCamera(tilt: .pi / 4, animated: true)
+		
+		zoomToUserLocationButton.setImage(UIImage(systemName: "location.north.line.fill"), for: .normal)
+	}
+	
+	/// Unlocks the camera so that it doesn't move with the user location marker.
+	private func unlockCamera() {
+		if mapView.positionProvider != nil {
+			mapView.positionProvider = nil
+		}
+		
+		if mapView.orientationProvider != nil {
+			mapView.orientationProvider = nil
+		}
+		
+		zoomToUserLocationButton.setImage(UIImage(systemName: "location"), for: .normal)
+	}
+	
 	override var preferredStatusBarStyle: UIStatusBarStyle {
 		switch traitCollection.userInterfaceStyle {
 		case .dark:
@@ -294,6 +306,20 @@ class ViewController: UIViewController {
 	
 	override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
 		setNeedsStatusBarAppearanceUpdate()
+	}
+}
+
+extension ViewController: MapViewDelegate {
+	func mapViewDidChangeCameraPositionProvider(_ mapView: MapView, positionProvider: (any CameraPositionProvider)?, oldProvider: (any CameraPositionProvider)?) {
+		if positionProvider == nil {
+			unlockCamera()
+		}
+	}
+	
+	func mapViewDidChangeCameraOrientationProvider(_ mapView: MapView, orientationProvider: (any CameraOrientationProvider)?, oldProvider: (any CameraOrientationProvider)?) {
+		if orientationProvider == nil {
+			unlockCamera()
+		}
 	}
 }
 

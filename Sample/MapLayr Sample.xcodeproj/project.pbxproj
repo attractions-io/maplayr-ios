@@ -19,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E100F48F2C47D8B1006BC8F7 /* Sample Walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Sample Walk.gpx"; sourceTree = "<group>"; };
 		E10DCC8B2AC59C500024F84C /* MapLayr Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MapLayr Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E10DCC8E2AC59C500024F84C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E10DCC902AC59C500024F84C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -71,6 +72,7 @@
 				E10DCC972AC59C510024F84C /* Assets.xcassets */,
 				E10DCC992AC59C510024F84C /* LaunchScreen.storyboard */,
 				E10DCC9C2AC59C510024F84C /* Info.plist */,
+				E100F48F2C47D8B1006BC8F7 /* Sample Walk.gpx */,
 			);
 			path = Sources;
 			sourceTree = "<group>";

@@ -60,7 +60,7 @@ We recommend adding the Maps folder to your .gitignore file.
 
 ## Displaying a Map
 
-To display an interactive map on the screen, you must first get a managed `Map` instance by specifying your map ID. The map must be located in the correct place in your application bundle (see above). Getting a "managed" map instance, rather than instantiating a `Map` yourself, allows the map to be updated automatically:
+To display an interactive map on the screen, you must first get a managed `Map` instance by specifying your map ID. If you use the synchronous API as shown below, the map must be located in the correct place in your application bundle (see above). If you don't want to bundle the map with your app, you can use the `async` version instead, which will download the map if necessary. Getting a managed map instance will automatically keep the map updated:
 
 ```swift
 let map = try! Map.managed(id: "5a1400cf-db2b-4dec-90f2-8f603cab4e72")
@@ -188,6 +188,24 @@ mapView.moveCamera(
 	animated: true
 )
 ```
+
+## Locking the Camera to the User's Location
+
+The camera can be locked to a user location marker by setting it to the `positionProvider` property of the map view:
+
+```swift
+mapView.positionProvider = locationMarker
+```
+
+You can additionally track the location marker's orientation using the `orientationProvider`:
+
+```swift
+mapView.orientationProvider = locationMarker
+```
+
+These changes can be animated using the `setProvider(position:orientation:animated:)` method. Other objects which conform to `CameraPositionProvider` and `CameraOrientationProvider` can also be used instead of just a location marker.
+
+If the user performs an interaction which goes against the location or orientation provider (such as panning the map via a gesture), the relevant provider is cleared and the map view's delegate is notified via the `mapViewDidChangeCameraPositionProvider` and/or `mapViewDidChangeCameraOrientationProvider` methods. Note that the map view does not automatically clear the orientation provider when the position provider is cleared.
 
 # Sample Code
 
