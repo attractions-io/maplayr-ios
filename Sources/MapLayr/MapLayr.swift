@@ -8,8 +8,12 @@
 import Foundation
 import ZIPFoundation
 
-@_exported import MapLayrInternal
-@_exported import MapGeometry
+@_spi(Internal)
+@_exported
+import MapLayrInternal
+
+@_exported
+import MapGeometry
 
 let zipExtractor = { @Sendable (sourceZipFile: URL, targetDirectory: URL) in
 	try FileManager.default.unzipItem(at: sourceZipFile, to: targetDirectory)
