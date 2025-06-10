@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
 	spec.name                = "MapLayr"
-	spec.version             = "0.12.0"
+	spec.version             = "0.13.0"
 	spec.summary             = "High performance mapping for venues."
 	spec.homepage            = "https://maplayr.com"
 	spec.author              = "AppLayr"
@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
 	spec.prepare_command     = <<-CMD
 	                                rm -r MapLayrInternal.xcframework.zip MapLayrInternal.xcframework MapGeometry.xcframework.zip MapGeometry.xcframework || true
 	                                
-	                                curl -L -o MapLayrInternal.xcframework.zip "https://cdn.attractions.io/frameworks/maplayr-ios/v0.12/MapLayrInternal.xcframework.zip"
+	                                curl -L -o MapLayrInternal.xcframework.zip "https://cdn.attractions.io/frameworks/maplayr-ios/v0.13/MapLayrInternal.xcframework.zip"
 	                                unzip MapLayrInternal.xcframework.zip
                                     rm MapLayrInternal.xcframework.zip
 	                                
