@@ -61,8 +61,8 @@ class ViewController: UIViewController {
 		}
 	}
 	
-	/// Holds reference for receiving update to the map's bounds.
-	private var mapBoundsUpdater: AnyCancellable?
+	/// Holds reference for receiving update to the map's current version.
+	private var mapVersionUpdater: AnyCancellable?
 	
 	/// Loads the map object and assigns it to the map view.
 	@IBAction private func loadMap() {
@@ -74,8 +74,8 @@ class ViewController: UIViewController {
 				// Even with the asynchronous version, this function will return immediately if the map doesn't need to be downloaded.
 				map = try await Map.managed(id: mapID)
 				
-				/// Receives updates to the map's bounds, so that the zoom to user location button can be updated if the bounds changes.
-				mapBoundsUpdater = map.$bounds.receive(on: RunLoop.main).sink(receiveValue: { [weak self] _ in self?.updateLocationButtonAvailability() })
+				/// Receives updates to the map's version, so that the zoom to user location button can be updated if the bounds changes.
+				mapVersionUpdater = map.$currentVersion.receive(on: RunLoop.main).sink(receiveValue: { [weak self] _ in self?.updateLocationButtonAvailability() })
 				
 				// Assign the map to the map view.
 				mapView.map = map
@@ -184,7 +184,7 @@ class ViewController: UIViewController {
 				break setPath
 			}
 			
-			let route = map.pathNetwork!.calculateDirections(from: Coordinates(originLocation), to: [ destinationLocation ])
+			let route = map.currentVersion.pathNetwork!.calculateDirections(from: Coordinates(originLocation), to: [ destinationLocation ])
 			
 			guard let route else {
 				print("A route to the destination was not found.")
@@ -217,7 +217,7 @@ class ViewController: UIViewController {
 				break checkAvailability
 			}
 			
-			guard let map, map.bounds.contains(Coordinates(location).mapPoint(using: .webMercator)) else {
+			guard let map, map.currentVersion.bounds.contains(Coordinates(location).mapPoint(using: .webMercator)) else {
 				shouldEnable = false
 				break checkAvailability
 			}
