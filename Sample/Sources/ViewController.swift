@@ -42,6 +42,25 @@ class ViewController: UIViewController {
 		loadMap()
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		
+		// Checks if the API key is correctly installed
+		verifyApiKey()
+	}
+	
+	private func verifyApiKey() {
+		let key = (Bundle.main.infoDictionary?["Attractions.io"] as? [String:Any?])?["APIKey"] as? String
+		
+		if key == nil {
+			let alert = UIAlertController(title: "No API Key", message: "You haven’t configured an API key for this project. Add a key called 'APIKey' inside the 'Attractions.io' key in Info.plist.", preferredStyle: .alert)
+			
+			alert.addAction(UIAlertAction(title: "OK", style: .default))
+			
+			present(alert, animated: true)
+		}
+	}
+	
 	/// Holds reference for receiving update to the map's bounds.
 	private var mapBoundsUpdater: AnyCancellable?
 	

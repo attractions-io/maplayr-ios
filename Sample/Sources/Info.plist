@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AppLayr</key>
+	<key>Attractions.io</key>
 	<dict/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to your position on the map.</string>

@@ -1,0 +1,54 @@
+name: Publish DocC docs
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build static-hosting bundle
+        shell: bash
+        env:
+          DOC_ARCHIVE: MapLayr.doccarchive
+          OUTPUT_DIR: site
+          HOSTING_BASE: ${{ github.event.repository.name }}
+        run: |
+          rm -rf "$OUTPUT_DIR"
+          
+          "$(xcrun --find docc)" process-archive transform-for-static-hosting \
+          	"$DOC_ARCHIVE" \
+          	--output-path "$OUTPUT_DIR" \
+          	--hosting-base-path "$HOSTING_BASE"
+          
+          touch "$OUTPUT_DIR/.nojekyll"
+          
+          cat > "$OUTPUT_DIR/index.html" <<EOF
+          <!DOCTYPE html>
+          <html>
+          	<head>
+          		<meta charset="utf-8">
+          		<title>Redirecting…</title>
+          		<meta http-equiv="refresh" content="0; url=./documentation/maplayr/">
+          		<script>"use strict";window.location.replace("./documentation/maplayr/");</script>
+          	</head>
+          	<body>Redirecting…</body>
+          </html>
+          EOF
+      
+      - name: Upload Pages artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
