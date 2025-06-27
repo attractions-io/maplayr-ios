@@ -45,7 +45,11 @@ if [[ -z "$MAP" ]]; then
 fi
 
 if [[ -z "$API_KEY" ]] && [[ ! -z "$INFOPLIST_FILE" ]]; then
-	API_KEY=$(plutil -extract "AppLayr.APIKey" raw "$INFOPLIST_FILE" || true)
+	API_KEY=$(plutil -extract "Attractions\\.io.APIKey" raw "$INFOPLIST_FILE" || true)
+	
+	if [[ $? -ne 0 ]]; then
+		API_KEY=$(plutil -extract "AppLayr.APIKey" raw "$INFOPLIST_FILE" || true)
+	fi
 	
 	if [[ $? -ne 0 ]]; then
 		API_KEY=""
