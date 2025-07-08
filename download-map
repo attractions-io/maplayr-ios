@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
+set -o pipefail
 
 MAP=""
 FORMAT="webp"
@@ -44,15 +45,11 @@ if [[ -z "$MAP" ]]; then
 	exit 1
 fi
 
-if [[ -z "$API_KEY" ]] && [[ ! -z "$INFOPLIST_FILE" ]]; then
-	API_KEY=$(plutil -extract "Attractions\\.io.APIKey" raw "$INFOPLIST_FILE" || true)
+if [[ -z "$API_KEY" ]] && [[ -n "$INFOPLIST_FILE" ]]; then
+	API_KEY=$(plutil -extract "Attractions\\.io.APIKey" raw "$INFOPLIST_FILE" 2>/dev/null) || true
 	
-	if [[ $? -ne 0 ]]; then
-		API_KEY=$(plutil -extract "AppLayr.APIKey" raw "$INFOPLIST_FILE" || true)
-	fi
-	
-	if [[ $? -ne 0 ]]; then
-		API_KEY=""
+	if [[ -z "$API_KEY" ]]; then
+		API_KEY=$(plutil -extract "AppLayr.APIKey" raw "$INFOPLIST_FILE" 2>/dev/null) || true
 	fi
 fi
 
@@ -84,32 +81,32 @@ if [[ $SKIP_IF_EXISTS == 1 ]] && [[ -f "$TARGET_DIR/$TARGET_NAME/manifest.json" 
 	exit 0
 fi
 
-TEMP_DIRECTORY=`mktemp -d`
+TEMP_DIRECTORY=$(mktemp -d)
+
+trap "rm -rf \"$TEMP_DIRECTORY\"" EXIT
 
 curl -Lfs --header "X-API-Key: $API_KEY" "https://api.attractions.io/v2/map-bundle/$MAP/version/latest/format/$FORMAT" > "$TEMP_DIRECTORY/bundle.zip" || {
 	echo "error: Could not download map $MAP"
-	rm -r "$TEMP_DIRECTORY"
 	exit 3
 }
 
 mkdir "$TEMP_DIRECTORY/bundle"
-cd "$TEMP_DIRECTORY/bundle"
+
+pushd "$TEMP_DIRECTORY/bundle" >/dev/null
 
 unzip ../bundle.zip >/dev/null
 
-cd - >/dev/null
+popd >/dev/null
 
 if [[ -d "$TARGET_DIR/$TARGET_NAME" ]]; then
-	if [[ -d ~/.Trash ]]; then
-		DATE_SUFFIX=`date "+%H.%M.%S"`
-		TRASH_NAME=~/.Trash/"$TARGET_NAME $DATE_SUFFIX"
+	if [[ -d "$HOME/.Trash" ]]; then
+		DATE_SUFFIX=$(date "+%H.%M.%S")
+		TRASH_NAME="$HOME/.Trash/$TARGET_NAME $DATE_SUFFIX"
 		
 		mv "$TARGET_DIR/$TARGET_NAME" "$TRASH_NAME"
 	else
-		rm -r "$TARGET_DIR/$TARGET_NAME"
+		rm -rf "$TARGET_DIR/$TARGET_NAME"
 	fi
 fi
 
 mv "$TEMP_DIRECTORY/bundle" "$TARGET_DIR/$TARGET_NAME"
-
-rm -r "$TEMP_DIRECTORY"
