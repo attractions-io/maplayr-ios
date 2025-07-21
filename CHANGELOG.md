@@ -25,4 +25,3 @@ Notable changes to MapLayr for iOS will be kept in this file. MapLayr uses seman
 - `ReactiveRoute` is a `Provider<Route?>` which can have `Provider`s for its origin and destination locations and path network. It can be created from a `Map`.
 - `Shape` is now a class and it can accept a `Provider<Path?>` (which a `ReactiveRoute` can provide) which will automatically update its appearance on the map.
 - A new `ManagementDelegate` can be added to a static property of `Map`, which can be used to customise some map download behaviour.
-- 
