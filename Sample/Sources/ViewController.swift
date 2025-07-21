@@ -126,7 +126,7 @@ class ViewController: UIViewController {
 	private func addAnnotations() {
 		// Create the annotation layer.
 		let layer = CoordinateAnnotationLayer<Ride>(
-			coordinate: \.coordinates,
+			coordinates: \.coordinates,
 			view: {
 				let view = LabeledAnnotationIcon(icon: #imageLiteral(resourceName: "Annotation"), text: $0.name)
 				
@@ -281,7 +281,7 @@ class ViewController: UIViewController {
 	
 	/// Locks the camera (and zooms in) so that its position tracks the user location marker.
 	private func lockCameraPosition() {
-		mapView.setProvider(position: userLocationMarker, animated: true)
+		mapView.setProvider(position: userLocationMarker.cameraPositionProvider, animated: true)
 		mapView.moveCamera(span: 50, animated: true)
 		
 		zoomToUserLocationButton.setImage(UIImage(systemName: "location.fill"), for: .normal)
@@ -291,7 +291,7 @@ class ViewController: UIViewController {
 	///
 	/// Additionally tilt the camera to 45°.
 	private func lockCameraOrientation() {
-		mapView.setProvider(orientation: userLocationMarker, animated: true)
+		mapView.setProvider(orientation: userLocationMarker.cameraOrientationProvider, animated: true)
 		mapView.moveCamera(tilt: .pi / 4, animated: true)
 		
 		zoomToUserLocationButton.setImage(UIImage(systemName: "location.north.line.fill"), for: .normal)

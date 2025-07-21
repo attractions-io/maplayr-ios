@@ -29,7 +29,13 @@ A `.doccarchive` is included with the repository, which can be opened using Xcod
 
 ### Sample Code
 
-MapLayr comes with a [sample application](Sample/) you can use to see how it works. To run it, you’ll need [a demo API key](https://share.hsforms.com/1ssbOsCdIRcW2iv4tDX6iVg2z3bi).
+MapLayr comes with a [sample application](Sample/) you can use to see how it works. 
+To run it, you’ll need [a demo API key](https://share.hsforms.com/
+1ssbOsCdIRcW2iv4tDX6iVg2z3bi).
+
+## Changelog
+
+For details about what's new in each version, including breaking changes, see [the changelog](CHANGELOG.md).
 
 ## Support
 
