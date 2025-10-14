@@ -32,8 +32,8 @@ let package = Package(
 		),
 		.binaryTarget(
 			name: "MapLayrInternal",
-			url: "https://cdn.attractions.io/frameworks/maplayr-ios/v0.16.0-indoorPositioning.2/MapLayrInternal.xcframework.zip",
-			checksum: "d8e64c84f139b559c7812d263535059a23aded9c1926a2b1479bd778213da920"
+			url: "https://cdn.attractions.io/frameworks/maplayr-ios/v0.16.0-indoorPositioning.3/MapLayrInternal.xcframework.zip",
+			checksum: "90115c82f2677a833d2b706dd1196bf48efe8fc1de8bd88a2f48743e5cc5a5f3"
 		),
 		.binaryTarget(
 			name: "MapGeometry",
